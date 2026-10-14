@@ -1,182 +1,341 @@
-import { Key, Browser, type Icon } from '@/components/slab'
-import { mobileApps, type AppProject } from '@/data/projects'
-import AIStack from '@/components/AIStack'
-import Flagship from '@/components/Flagship'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { ArrowSquareOut, GithubLogo, Play, X } from '@phosphor-icons/react'
+import {
+  figmaEmbedSrc,
+  isPlaceholderLink,
+  projectFilters,
+  projects,
+  type Project,
+  type ProjectCategory,
+} from '@/data/portfolio'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
-/* Browser extensions - small Chrome tools, shown as a compact two-up block
-   inside this same section (not a new section of their own). */
-type Extension = {
-  name: string
-  desc: string
-  imageSrc: string
-  imageAlt: string
-  Icon: Icon
+type Filter = 'all' | ProjectCategory
+
+function youtubeEmbed(url: string): string | null {
+  const m =
+    url.match(/youtu\.be\/([\w-]+)/) ||
+    url.match(/[?&]v=([\w-]+)/) ||
+    url.match(/youtube\.com\/embed\/([\w-]+)/)
+  return m ? `https://www.youtube.com/embed/${m[1]}` : null
 }
 
-const EXTENSIONS: Extension[] = [
-  {
-    name: 'Extension Name One',
-    desc: 'PLACEHOLDER - tell me what to put here: what the extension does and who uses it.',
-    imageSrc: '/placeholders/extension-1.jpg',
-    imageAlt: 'Extension one popup placeholder',
-    Icon: Key,
-  },
-  {
-    name: 'Extension Name Two',
-    desc: 'PLACEHOLDER - tell me what to put here: what the extension does and who uses it.',
-    imageSrc: '/placeholders/extension-2.jpg',
-    imageAlt: 'Extension two popup placeholder',
-    Icon: Browser,
-  },
-]
+function driveEmbed(url: string): string | null {
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/)
+  return m ? `https://drive.google.com/file/d/${m[1]}/preview` : null
+}
 
-/* ── Extension card ─────────────────────────────────────────────
-   Vertical card: a faux browser window on top (chrome bar + equal-height
-   stage), then badge / title / description below. The stage is the same
-   height on both cards so portrait and landscape screenshots read as a
-   matched set; each image is centered with
-   object-fit: contain and never displayed past its native width. */
-function ExtensionCard({ ext }: { ext: Extension }) {
-  const ExtIcon = ext.Icon
+function MediaPlayer({ project, autoPreview }: { project: Project; autoPreview?: boolean }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canHover = useMediaQuery('(hover: hover) and (pointer: fine)')
+  const src = project.videoUrl
+
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el || !autoPreview || !canHover) return
+    el.play().catch(() => {})
+    return () => {
+      el.pause()
+      el.currentTime = 0
+    }
+  }, [autoPreview, canHover])
+
+  if (!src) {
+    return (
+      <img src={project.poster} alt="" className="media-poster" />
+    )
+  }
+
+  const yt = youtubeEmbed(src)
+  if (yt) {
+    return (
+      <iframe
+        className="media-frame"
+        src={yt}
+        title={`${project.title} demo`}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    )
+  }
+
+  const drive = driveEmbed(src)
+  if (drive) {
+    return (
+      <iframe className="media-frame" src={drive} title={`${project.title} demo`} allow="autoplay" allowFullScreen />
+    )
+  }
+
   return (
-    <li className="ext-card">
-      <figure className="ext-card__window">
-        <div className="ext-card__chrome" aria-hidden="true">
-          <span className="ext-card__dots">
-            <span className="ext-card__dot" />
-            <span className="ext-card__dot" />
-            <span className="ext-card__dot" />
-          </span>
-          <span className="ext-card__urlbar">
-            <ExtIcon size={12} weight="bold" />
-            chrome-extension
-          </span>
-        </div>
-        <div className="ext-card__stage">
-          <img
-            className="ext-card__img"
-            src={ext.imageSrc}
-            alt={ext.imageAlt}
-            loading="lazy"
-            decoding="async"
-          />
-        </div>
-      </figure>
-      <div className="ext-card__body">
-        <span className="ext-card__badge">
-          <ExtIcon size={14} weight="bold" aria-hidden="true" />
-          Chrome Extension
-        </span>
-        <h4 className="ext-card__name">{ext.name}</h4>
-        <p className="ext-card__desc">{ext.desc}</p>
-      </div>
-    </li>
+    <video
+      ref={videoRef}
+      className="media-video"
+      poster={project.poster}
+      controls={!autoPreview}
+      muted={Boolean(autoPreview)}
+      loop={Boolean(autoPreview)}
+      playsInline
+      preload="metadata"
+    >
+      <source src={src} type="video/mp4" />
+    </video>
   )
 }
 
-/* ── App card ───────────────────────────────────────────────── */
-function AppCard({ app }: { app: AppProject }) {
-  return (
-    <li
-      className="app-card"
-      style={{ ['--app-color' as string]: app.accentColor }}
+function ProjectModal({
+  project,
+  onClose,
+}: {
+  project: Project
+  onClose: () => void
+}) {
+  const titleId = useId()
+  const closeRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null
+    document.body.style.overflow = 'hidden'
+    closeRef.current?.focus()
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+      if (e.key !== 'Tab' || !dialogRef.current) return
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea, input, select, iframe, video, [tabindex]:not([tabindex="-1"])',
+      )
+      if (!focusable.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+      prev?.focus()
+    }
+  }, [onClose])
+
+  const showFigma = Boolean(project.figmaUrl && !isPlaceholderLink(project.figmaUrl))
+
+  return createPortal(
+    <div
+      className="modal-backdrop"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
     >
-      <div className="app-card__img-wrap">
-        {app.imageSrc ? (
-          <img
-            className="app-card__img"
-            src={app.imageSrc}
-            alt={`${app.name} screenshot`}
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="app-card__img-placeholder" aria-hidden="true">
-            <span className="app-card__img-initials">
-              {app.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
-            </span>
+      <div
+        ref={dialogRef}
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+      >
+        <button ref={closeRef} type="button" className="modal__close" onClick={onClose} aria-label="Close details">
+          <X size={20} weight="bold" />
+        </button>
+        <div className="modal__media">
+          {showFigma ? (
+            <iframe
+              className="media-frame"
+              src={figmaEmbedSrc(project.figmaUrl!)}
+              title={`${project.title} Figma prototype`}
+              allowFullScreen
+            />
+          ) : (
+            <MediaPlayer project={project} />
+          )}
+        </div>
+        <div className="modal__body">
+          <p className="eyebrow">{project.role}</p>
+          <h3 id={titleId}>{project.title}</h3>
+          {project.date ? <p className="muted">{project.date}</p> : null}
+          {project.award && <p className="pill">{project.award}</p>}
+          <p>{project.description}</p>
+          {project.insights && (
+            <>
+              <h4>Insights</h4>
+              <p>{project.insights}</p>
+            </>
+          )}
+          {project.problem && (
+            <>
+              <h4>Problem</h4>
+              <p>{project.problem}</p>
+            </>
+          )}
+          {project.solution && (
+            <>
+              <h4>Solution</h4>
+              <p>{project.solution}</p>
+            </>
+          )}
+          {project.features && project.features.length > 0 && (
+            <>
+              <h4>Features</h4>
+              <ul>
+                {project.features.map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
+            </>
+          )}
+          {project.techStack.length > 0 && (
+            <>
+              <h4>Tech</h4>
+              <ul className="chips">
+                {project.techStack.map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
+            </>
+          )}
+          {project.screenshots.length > 0 && (
+            <>
+              <h4>Screenshots</h4>
+              <div className="shot-grid">
+                {project.screenshots.map((s) => (
+                  <img key={s.src} src={s.src} alt={s.alt} loading="lazy" />
+                ))}
+              </div>
+            </>
+          )}
+          <div className="modal__links">
+            {project.figmaUrl && (
+              <a className="btn btn--primary" href={project.figmaUrl} target="_blank" rel="noreferrer">
+                View in Figma
+                <ArrowSquareOut size={16} aria-hidden />
+              </a>
+            )}
+            {project.liveUrl && !isPlaceholderLink(project.liveUrl) && (
+              <a className="btn btn--ghost" href={project.liveUrl} target="_blank" rel="noreferrer">
+                View Project
+                <ArrowSquareOut size={16} aria-hidden />
+              </a>
+            )}
+            {project.githubUrl && !isPlaceholderLink(project.githubUrl) && (
+              <a className="btn btn--ghost" href={project.githubUrl} target="_blank" rel="noreferrer">
+                <GithubLogo size={16} aria-hidden />
+                GitHub
+              </a>
+            )}
           </div>
-        )}
-        <span className="app-card__badge">{app.badge}</span>
-        <span className="app-card__img-fade" aria-hidden="true" />
+        </div>
       </div>
-      <div className="app-card__body">
-        <h3 className="app-card__name">{app.name}</h3>
-        <p className="app-card__tagline">{app.tagline}</p>
-        <p className="app-card__desc">{app.description}</p>
-        <ul className="app-card__stats" role="list">
-          {app.stats.map((stat) => (
-            <li key={stat.label} className="app-card__stat">
-              <span className="app-card__stat-value">{stat.value}</span>
-              <span className="app-card__stat-label">{stat.label}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </li>
+    </div>,
+    document.body,
   )
 }
 
-/* ── Sections ───────────────────────────────────────────────
-   Two exports so the Projects dialog can open each body of work on its own;
-   the default still composes them (with Flagship) for anything that wants
-   the whole section. */
-export function AIStackSection() {
+function Card({ project, onOpen }: { project: Project; onOpen: (p: Project, el: HTMLElement) => void }) {
+  const [hover, setHover] = useState(false)
+  const canHover = useMediaQuery('(hover: hover) and (pointer: fine)')
+  const fileVideo = Boolean(project.videoUrl && !youtubeEmbed(project.videoUrl) && !driveEmbed(project.videoUrl))
+
   return (
-    <section
-      className="projects projects--ai"
-      id="projects"
-      aria-labelledby="projects-heading"
-      data-reveal
+    <article
+      className="project-card"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
     >
-      <header className="projects__header">
-        <span className="projects__eyebrow">Placeholder category</span>
-        <h2 className="projects__headline" id="projects-heading">
-          Your systems headline.
-        </h2>
-        <p className="projects__subhead">
-          PLACEHOLDER - tell me what to put here: one line on the systems below.
-          Open a branch to see what sits under it.
-        </p>
-      </header>
-      <div className="projects__panel" id="projects-panel">
-        <AIStack />
+      <div className="project-card__media">
+        {canHover && hover && fileVideo ? (
+          <MediaPlayer project={project} autoPreview />
+        ) : (
+          <img src={project.poster} alt={`${project.title} preview`} loading="lazy" />
+        )}
       </div>
-    </section>
-  )
-}
-
-export function AppsSection() {
-  return (
-    <section className="projects projects--apps" aria-label="Apps and extensions" data-reveal>
-      <div className="projects__panel">
-        <span className="projects__ext-eyebrow">Your apps label</span>
-        <ul className="projects__apps" role="list">
-          {mobileApps.map((app) => (
-            <AppCard key={app.name} app={app} />
-          ))}
-        </ul>
-
-        {/* Browser extensions - a compact companion block in the same section */}
-        <div className="projects__ext">
-          <span className="projects__ext-eyebrow">Your extensions label</span>
-          <ul className="ext-grid" role="list">
-            {EXTENSIONS.map((ext) => (
-              <ExtensionCard key={ext.name} ext={ext} />
+      <div className="project-card__body">
+        <h3>{project.title}</h3>
+        <p>{project.description}</p>
+        <p className="muted">
+          Role: {project.role}
+          {project.date ? ` · ${project.date}` : ''}
+        </p>
+        {project.techStack.length > 0 && (
+          <ul className="chips">
+            {project.techStack.map((t) => (
+              <li key={t}>{t}</li>
             ))}
           </ul>
+        )}
+        <div className="project-card__actions">
+          {project.category === 'systems' && project.videoUrl && (
+            <button type="button" className="btn btn--ghost btn--sm" onClick={(e) => onOpen(project, e.currentTarget)}>
+              <Play size={16} weight="fill" aria-hidden />
+              Watch Demo
+            </button>
+          )}
+          {project.category === 'figma' && project.figmaUrl && (
+            <a className="btn btn--ghost btn--sm" href={project.figmaUrl} target="_blank" rel="noreferrer">
+              View in Figma
+            </a>
+          )}
+          {project.liveUrl && !isPlaceholderLink(project.liveUrl) && (
+            <a className="btn btn--ghost btn--sm" href={project.liveUrl} target="_blank" rel="noreferrer">
+              View Project
+              <ArrowSquareOut size={16} aria-hidden />
+            </a>
+          )}
+          <button type="button" className="btn btn--primary btn--sm" onClick={(e) => onOpen(project, e.currentTarget)}>
+            View Details
+          </button>
         </div>
       </div>
-    </section>
+    </article>
   )
 }
 
 export default function Projects() {
+  const [filter, setFilter] = useState<Filter>('all')
+  const [active, setActive] = useState<Project | null>(null)
+
+  const open = useCallback((p: Project, _el: HTMLElement) => {
+    setActive(p)
+  }, [])
+
+  const close = useCallback(() => setActive(null), [])
+
+  const visible = projects.filter((p) => filter === 'all' || p.category === filter)
+
   return (
-    <>
-      <AIStackSection />
-      <AppsSection />
-      <Flagship />
-    </>
+    <section id="projects" className="section" aria-labelledby="projects-heading" data-reveal>
+      <div className="container">
+        <p className="eyebrow">Selected work</p>
+        <h2 id="projects-heading">Projects</h2>
+        <p className="lede">
+          Filter by type. Open a card for details, demos, and project files.
+        </p>
+        <div className="tabs" role="tablist" aria-label="Project type">
+          {projectFilters.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={filter === tab.id}
+              className={filter === tab.id ? 'tabs__btn is-active' : 'tabs__btn'}
+              onClick={() => setFilter(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div className="card-grid">
+          {visible.map((p) => (
+            <Card key={p.id} project={p} onOpen={open} />
+          ))}
+        </div>
+      </div>
+      {active && <ProjectModal project={active} onClose={close} />}
+    </section>
   )
 }

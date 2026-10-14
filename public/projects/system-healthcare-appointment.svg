@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="HealthCare Appointment System">
+  <rect width="1280" height="720" fill="#0F2744"/>
+  <rect x="64" y="64" width="1152" height="592" rx="24" fill="#F6F8FB"/>
+  <text x="640" y="318" text-anchor="middle" font-family="Georgia, serif" font-size="22" letter-spacing="4" fill="#0F766E">SYSTEMS</text>
+  <text x="640" y="400" text-anchor="middle" font-family="Georgia, serif" font-size="36" fill="#0F2744">HealthCare Appointment System</text>
+</svg>

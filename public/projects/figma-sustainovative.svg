@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Sustainovative Figma preview placeholder">
+  <rect width="1280" height="720" fill="#0F3D38"/>
+  <rect x="90" y="90" width="1100" height="540" rx="20" fill="#F6F8FB"/>
+  <rect x="130" y="130" width="360" height="460" rx="16" fill="#D7EEEB"/>
+  <rect x="520" y="130" width="630" height="210" rx="16" fill="#0F766E"/>
+  <rect x="520" y="370" width="300" height="220" rx="16" fill="#E8EEF4"/>
+  <rect x="850" y="370" width="300" height="220" rx="16" fill="#E8EEF4"/>
+  <text x="640" y="690" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" fill="#F6F8FB">Sustainovative · 3rd Place · replace with a Figma export</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Power BI dashboard screenshot placeholder">
+  <rect width="1280" height="720" fill="#F6F8FB"/>
+  <rect x="40" y="40" width="1200" height="80" rx="12" fill="#0F2744"/>
+  <rect x="40" y="148" width="280" height="140" rx="12" fill="#0F766E"/>
+  <rect x="340" y="148" width="280" height="140" rx="12" fill="#115E59"/>
+  <rect x="640" y="148" width="280" height="140" rx="12" fill="#0F2744"/>
+  <rect x="940" y="148" width="280" height="140" rx="12" fill="#4B5C6E"/>
+  <rect x="40" y="312" width="780" height="348" rx="12" fill="#E8EEF4"/>
+  <rect x="840" y="312" width="400" height="348" rx="12" fill="#D7EEEB"/>
+  <text x="640" y="60" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" fill="#F6F8FB" dy="28">Power BI · End-to-end solution (replace with screenshot)</text>
+</svg>

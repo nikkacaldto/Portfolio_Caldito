@@ -14,7 +14,3 @@ export function useMediaQuery(query: string): boolean {
   }, [query])
   return matches
 }
-
-/** Below the shell breakpoint: the rail is gone and the app chrome takes over. */
-export const PHONE_QUERY = '(max-width: 1099px)'
-export const useIsPhone = () => useMediaQuery(PHONE_QUERY)

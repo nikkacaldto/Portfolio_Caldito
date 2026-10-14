@@ -1,74 +1,113 @@
-# Portfolio Template
+# Nikka Mae D. Caldito — Portfolio
 
-A personal portfolio with a fixed profile rail, an animated contour background, a bento home screen, a 3D page carousel, and a separate app-style layout for phones. Every piece of content is a placeholder. You swap in your own.
+Personal site for recruiters and hiring managers. Built from the [brewed-ops/portfolio-template](https://github.com/brewed-ops/portfolio-template) **stack** (Vite 6, React 19, TypeScript, CSS tokens, Poppins, Phosphor, light-default theme) and reshaped into a single-page, scan-friendly layout.
 
-Stack: Vite 6, React 19, TypeScript, plain CSS custom properties, Three.js, GSAP, Lenis, React Router 7, Phosphor icons, Poppins.
-
-## What it looks like
-
-Straight from this repo, placeholders and all.
-
-**Desktop** - the profile rail, the contour background and the bento home.
-
-![Desktop: profile rail on the left, headline, tools marquee and a bento grid of project, about, credential, services and testimonial cards](docs/screenshots/desktop.png)
-
-**Phone** - an app-style layout: a floating tab bar, a glance widget for your stats, app-icon tools and swipeable shelf cards. Light and dark.
-
-<p>
-  <img src="docs/screenshots/mobile-light.png" alt="Phone, light theme: profile header, one-line headline, stats widget, tools row and explore cards above a floating tab bar" width="300">
-  &nbsp;&nbsp;
-  <img src="docs/screenshots/mobile-dark.png" alt="Phone, dark theme: the same Home screen on a navy background" width="300">
-</p>
-
-## Run it
+## Run locally
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
-npm run build      # typecheck + production build to dist/
-npm run lint       # ESLint with the TypeScript parser and the React hooks rules
+npm run dev
 ```
 
-## Make it yours
+Open [http://localhost:5173](http://localhost:5173).
 
-Every spot that needs your content says **PLACEHOLDER** and describes what goes there. You can edit the files yourself, or open the repo in an AI coding tool and tell it what to put in each spot.
+```bash
+npm run build    # typecheck + production build
+npm run preview  # serve dist/
+npm run lint
+```
+
+## Edit content (do this first)
+
+All copy, projects, Figma URLs, social links, stats, and contact details live in **one file**:
+
+`src/data/portfolio.ts`
+
+You do not need to edit React components for routine updates.
+
+## Replace these files and links
 
 | What | Where |
-|---|---|
-| Name, handle, photo, email, socials, Home headline, phone stats and their icons | `src/data/profile.ts` (start here) |
-| Phone headline size (holds your headline on one line) | `--headline-em` in `src/styles/mobile-pass.css` - the comment there shows how to measure it |
-| Your photo | `public/avatar.svg` (or point `avatarSrc` at a `.webp`/`.png`) |
-| Page headlines and copy | the top of each page component: `ProjectsGrid`, `ServicesGrid`, `ShowcaseGrid`, `TestimonialsGrid`, `AboutGrid`, `ContactGrid` in `src/components/` |
-| Funnel pages and websites (the 3D carousel) | `src/data/funnels.ts` + HTML files in `public/funnels/` and `public/samples/` |
-| Projects, apps, side builds | `src/data/projects.ts`, `src/data/ai-stack.ts` |
-| FAQs | `src/data/faqs.ts` |
-| Tools marquee | `src/components/ToolsMarquee.tsx` (logos in `public/icons/`) |
-| Testimonial videos | `public/testimonials/`, then set `src` in `TestimonialsGrid.tsx` |
-| Contact form | `src/lib/contact.ts` (opens the visitor's email app by default; set `VITE_CONTACT_ENDPOINT` to post to your own backend) |
-| SEO, share image, favicon | `index.html`, `public/favicon.svg` |
-| Colors | `src/styles/tokens.css` |
-| Privacy / Terms | `src/components/Privacy.tsx`, `src/components/ToS.tsx` |
+| --- | --- |
+| CV PDF | `public/Nikka_Mae_Caldito_CV.pdf` |
+| System project files | Google Drive links on `liveUrl` in `src/data/portfolio.ts` |
+| System card previews | `public/projects/system-coal-combustion.svg`, `system-cinema-buz.svg`, `system-healthcare-appointment.svg` (replace with screenshots when available) |
+| Power BI screenshot | `public/projects/dashboard-pbi-e2e.jpg`, `dashboard-pbi-capstone.jpg` |
+| Figma previews | `public/projects/figma-creative-clicks.svg`, `figma-sustainovative.svg` |
+| Figma prototype URLs | `figmaUrl` on the Figma projects in `src/data/portfolio.ts` |
+| Optional live/GitHub URLs | `liveUrl` / `githubUrl` on system projects |
+| LinkedIn / GitHub / Facebook | `socials` in `src/data/portfolio.ts` |
+| Canonical / Open Graph URL | `index.html` (`https://example.com`) and `site.url` in `portfolio.ts` |
+| Favicon / share image | `public/favicon.svg`, `public/og-image.svg` |
+| Contact form | `.env` — see below |
 
-### Adding your own funnels and websites
+Video specs are in `public/projects/README.txt`. After you drop in MP4s, keep `videoUrl` and `poster` in `portfolio.ts` in sync (you can switch posters to `.jpg`).
 
-1. Put the page's HTML in `public/funnels/` (single pages, shown 16:9) or `public/samples/` (full websites, shown 3:4).
-2. Add an entry to `src/data/funnels.ts`.
-3. Run `node scripts/make-thumbs.mjs` to render the thumbnails. It uses the Playwright install that comes with the dev dependencies (run `npx playwright install chromium` once if needed).
+## Contact form (Formspree)
 
-To regenerate the placeholder pages: `node scripts/make-placeholder-sites.mjs`.
+1. Create a form at [formspree.io](https://formspree.io).
+2. Copy `.env.example` to `.env`.
+3. Set:
 
-## Notes
+```
+VITE_CONTACT_ENDPOINT=https://formspree.io/f/YOUR_FORM_ID
+```
 
-- The background shader measures the visitor's frame rate and steps down on slow machines (`src/lib/perf.ts`). Keep any large `backdrop-filter` blur off the layers above it, because blur over an animated canvas is the most expensive thing on the page.
-- From 1100px down, the site switches to the phone layout. `src/styles/mobile-app.css` owns its components (`TabBar`, `QuickMenu`, `HomeMobile`); `src/styles/mobile-pass.css` holds the motion (the tab pill, the bar hiding on scroll, page arrival, tile depth) and the native-feel fixes. Everything respects `prefers-reduced-motion` and the site's own Reduce motion switch.
-- Anything new you add above the fold on Home must join the intro hold-back list in `src/styles/boot.css`. Otherwise it shows through the intro animation.
+Until that variable is set, the form opens a `mailto:` draft to the email in `portfolio.ts`.
 
-## Credits
+EmailJS works the same way if you point `VITE_CONTACT_ENDPOINT` at a serverless proxy that accepts JSON `{ name, email, message }`.
 
-- Contour background technique inspired by the landonorris.com site by OFF+BRAND. The simplex noise is Ashima Arts / Ian McEwan (MIT).
-- Icons: [Phosphor](https://phosphoricons.com) (MIT). Tool logos in `public/icons/` are trademarks of their owners and are included as examples only.
-- Font: Poppins (SIL Open Font License).
+## Deploy
 
-## License
+### GitHub Pages (recommended for a public recruiter URL)
 
-MIT for the code. See [LICENSE](LICENSE).
+This is a **Vite 6 + React 19** app. GitHub Actions builds `dist/` and publishes it.
+
+Expected live URL if the repository is named `Portfolio_Caldito` under `nikkacaldto`:
+
+**https://nikkacaldto.github.io/Portfolio_Caldito/**
+
+1. On GitHub, create a **public** repository named `Portfolio_Caldito` (same spelling as the folder). Do not initialize it with a README if you already have this project locally.
+2. In this project folder, point `origin` at your repo (the current remote still points at the template):
+
+```bash
+git remote rename origin template
+git remote add origin https://github.com/nikkacaldto/Portfolio_Caldito.git
+git add -A
+git commit -m "Publish Nikka Caldito portfolio"
+git branch -M main
+git push -u origin main
+```
+
+3. GitHub → **Settings → Pages** → Build and deployment **Source: GitHub Actions**.
+4. Open the **Actions** tab, wait for **Deploy GitHub Pages** to finish, then open the URL above.
+
+If you name the repo `nikkacaldto.github.io` instead, the site is served at `https://nikkacaldto.github.io/` (root). Update `site.url` in `src/data/portfolio.ts` and the canonical / Open Graph URLs in `index.html` to match.
+
+Optional: add a repository secret `VITE_CONTACT_ENDPOINT` with your Formspree URL so the contact form posts online. Without it, the form still opens a `mailto:` draft.
+
+Local `npm run dev` stays at `http://localhost:5173` (base `/`). The Pages base path is applied only in GitHub Actions via `GITHUB_REPOSITORY`.
+
+### Vercel
+
+```bash
+npm i -g vercel
+vercel
+```
+
+Or import the GitHub repo in the Vercel dashboard. Framework preset: **Vite**. Build command: `npm run build`. Output: `dist`.
+
+Set `VITE_CONTACT_ENDPOINT` in Project → Settings → Environment Variables, then redeploy.
+
+### Netlify
+
+```bash
+npm i -g netlify-cli
+netlify deploy --prod --dir=dist
+```
+
+Or connect the repo. Build command: `npm run build`. Publish directory: `dist`.
+
+`vercel.json` and `netlify.toml` are included for SPA routing.
+
+After deploy, replace `https://example.com` in `index.html` (canonical, Open Graph) with your live URL so share previews work.
