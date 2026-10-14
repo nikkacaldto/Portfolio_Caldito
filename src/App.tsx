@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
 import About from '@/components/About'
@@ -10,9 +11,12 @@ import Awards from '@/components/Awards'
 import Contact from '@/components/Contact'
 import Footer from '@/components/Footer'
 import { useScrollReveal } from '@/hooks/useScrollReveal'
+import { bindInPageNav } from '@/lib/inPageNav'
 
 export default function App() {
   useScrollReveal()
+
+  useEffect(() => bindInPageNav(), [])
 
   return (
     <>

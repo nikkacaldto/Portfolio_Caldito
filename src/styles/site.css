@@ -122,18 +122,26 @@ code {
   transform: none;
 }
 
-.nav {
+.nav-root {
   position: sticky;
   top: 0;
   z-index: 40;
+}
+
+.nav {
   height: var(--nav-h);
   background: transparent;
 }
 
-.nav--scrolled {
+.nav--scrolled,
+.nav--open {
+  background: var(--cream);
+  border-bottom: 1px solid var(--line);
+}
+
+.nav--scrolled:not(.nav--open) {
   background: var(--glass);
   backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--line);
 }
 
 .nav__inner {
@@ -183,12 +191,15 @@ code {
 .nav__drawer {
   position: fixed;
   inset: var(--nav-h) 0 0;
-  background: var(--cream);
+  z-index: 39;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  padding: 1.25rem var(--container-x) 2rem;
-  z-index: 39;
+  padding: 1.25rem var(--container-x) max(2rem, env(safe-area-inset-bottom));
+  background: var(--cream);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .nav__drawer a {
