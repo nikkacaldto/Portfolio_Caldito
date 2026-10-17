@@ -147,19 +147,6 @@ export const education: EducationItem[] = [
 
 export const experience: ExperienceItem[] = [
   {
-    role: 'IT Officer',
-    organization: 'Rancho Blanco',
-    dates: 'Oct 15, 2026 – Present',
-    bullets: [
-      'Assist in maintaining and monitoring the company website, including form and feature checks',
-      'Perform website quality assurance covering form functionality, mobile responsiveness, and basic SEO structure',
-      'Identify, document, and report website issues, bugs, and inconsistencies',
-      'Help manage and update product images and website content as needed',
-      'Assist in monitoring website performance and coordinating technical improvements',
-      'Support other IT-related tasks and technical operations as assigned',
-    ],
-  },
-  {
     role: 'Compliance Intern',
     organization: 'QNE Software Philippines Inc.',
     dates: 'Feb 9, 2026 – May 13, 2026',
