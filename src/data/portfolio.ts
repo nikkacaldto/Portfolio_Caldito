@@ -331,13 +331,41 @@ export const projects: Project[] = projectEntries.map((project) => ({
 }))
 
 export const skillGroups: SkillGroup[] = [
-  { title: 'Programming & Web Dev', items: ['HTML', 'CSS', 'JavaScript', 'PHP', 'MySQL'] },
-  { title: 'Data Visualization & Analysis', items: ['Power BI', 'Microsoft Excel'] },
-  { title: 'UI/UX Design', items: ['Figma'] },
-  { title: 'Project Management & Collaboration', items: ['Documentation', 'Team coordination', 'Requirement tracking'] },
-  { title: 'Basic Troubleshooting & Problem-Solving', items: ['Software testing', 'Issue logging', 'Root-cause notes'] },
-  { title: 'Soft skills', items: ['Communication', 'Time Management', 'Attention to Detail', 'Adaptability'] },
-  { title: 'Tools', items: ['Microsoft Word', 'Microsoft Excel', 'Microsoft PowerPoint'] },
+  {
+    title: 'Programming & Web Development',
+    items: [
+      'HTML',
+      'CSS',
+      'JavaScript',
+      'TypeScript',
+      'PHP',
+      'React',
+      'Bootstrap',
+      'Python',
+      'C#',
+      'C++',
+      'MySQL',
+    ],
+  },
+  { title: 'Data Visualization & Analysis', items: ['Power BI', 'Microsoft Excel', 'PostgreSQL'] },
+  { title: 'UI/UX Design', items: ['Figma', 'Canva'] },
+  {
+    title: 'Project Management & Collaboration',
+    items: ['GitHub', 'Documentation', 'Team Coordination', 'Requirement Tracking'],
+  },
+  {
+    title: 'Software Testing & Troubleshooting',
+    items: [
+      'Software Testing',
+      'Issue Logging',
+      'Root-Cause Analysis Notes',
+      'Basic Troubleshooting',
+      'Problem-Solving',
+    ],
+  },
+  { title: 'AI Tools & Coding Assistants', items: ['ChatGPT', 'Claude', 'Cursor', 'GitHub Copilot'] },
+  { title: 'Soft Skills', items: ['Communication', 'Time Management', 'Attention to Detail', 'Adaptability'] },
+  { title: 'Productivity Tools', items: ['Microsoft Word', 'Microsoft PowerPoint'] },
 ]
 
 export const certifications: Certification[] = [
